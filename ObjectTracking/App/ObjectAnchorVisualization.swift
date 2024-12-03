@@ -16,12 +16,80 @@ class ObjectAnchorVisualization {
     private let alpha: CGFloat = 0.7
     private let axisScale: Float = 0.05
     
-    var boundingBoxOutline: BoundingBoxOutline
+    //var boundingBoxOutline: BoundingBoxOutline
     
     var entity: Entity
+    var hologram: Entity
+    var updateHologram = true
+    var objectId = UUID()
+    
 
     init(for anchor: ObjectAnchor, withModel model: Entity? = nil) {
-        boundingBoxOutline = BoundingBoxOutline(anchor: anchor, alpha: alpha)
+        //boundingBoxOutline = BoundingBoxOutline(anchor: anchor, alpha: alpha)
+        let transform = Transform(matrix: anchor.originFromAnchorTransform)
+        
+        let entity = Entity()
+        
+        
+        let originVisualization = Entity.createAxes(axisScale: axisScale, alpha: alpha)
+        
+        if let model {
+            // Overwrite the model's appearance to a yellow wireframe.
+//            var wireframeMaterial = PhysicallyBasedMaterial()
+//            wireframeMaterial.triangleFillMode = .lines
+//            wireframeMaterial.faceCulling = .back
+//            wireframeMaterial.baseColor = .init(tint: .yellow)
+//            wireframeMaterial.blending = .transparent(opacity: 0.5)
+//            
+//            model.applyMaterialRecursively(wireframeMaterial)
+            entity.addChild(model)
+            
+            
+            
+        }
+        
+        //boundingBoxOutline.entity.isEnabled = model == nil
+        
+//        entity.addChild(originVisualization)
+//        entity.addChild(boundingBoxOutline.entity)
+        
+        entity.transform = Transform(matrix: anchor.originFromAnchorTransform)
+        entity.isEnabled = anchor.isTracked
+        
+        
+        
+        let descriptionEntity = Entity.createText(anchor.referenceObject.name, height: textBaseHeight * axisScale)
+        descriptionEntity.transform.translation.x = textBaseHeight * axisScale
+        descriptionEntity.transform.translation.y = anchor.boundingBox.extent.y * 0.5
+        entity.addChild(descriptionEntity)
+        self.entity = entity
+        
+        // Also instantiate the "hologram".
+        let hologram = Entity()
+        if let model {
+            let modelcopy = model.clone(recursive: true)
+            // Overwrite the model's appearance to a yellow wireframe.
+            var wireframeMaterial = PhysicallyBasedMaterial()
+            wireframeMaterial.triangleFillMode = .lines
+            wireframeMaterial.faceCulling = .back
+            wireframeMaterial.baseColor = .init(tint: .yellow)
+            wireframeMaterial.blending = .transparent(opacity: 0.2)
+            modelcopy.applyMaterialRecursively(wireframeMaterial)
+            // Make the hologram slightly smaller so it fits "underneath" the model
+            modelcopy.transform.scale *= 1.10
+            hologram.addChild(modelcopy)
+        }
+        hologram.transform = transform
+        hologram.isEnabled = hologram.isEnabled
+        
+        // Make the hologram grabbable
+        hologram.components.set(InputTargetComponent(allowedInputTypes: .indirect))
+        hologram.generateCollisionShapes(recursive: true)
+        self.hologram = hologram
+    }
+    
+    init(for transform: Transform, withModel model: Entity? = nil) {
+        //boundingBoxOutline = BoundingBoxOutline(anchor: anchor, alpha: alpha)
         
         let entity = Entity()
         
@@ -29,37 +97,83 @@ class ObjectAnchorVisualization {
         
         if let model {
             // Overwrite the model's appearance to a yellow wireframe.
+//            var wireframeMaterial = PhysicallyBasedMaterial()
+//            wireframeMaterial.triangleFillMode = .lines
+//            wireframeMaterial.faceCulling = .back
+//            wireframeMaterial.baseColor = .init(tint: .yellow)
+//            wireframeMaterial.blending = .transparent(opacity: 0.5)
+//
+//            model.applyMaterialRecursively(wireframeMaterial)
+            entity.addChild(model)
+        }
+        
+        //boundingBoxOutline.entity.isEnabled = model == nil
+        
+//        entity.addChild(originVisualization)
+//        entity.addChild(boundingBoxOutline.entity)
+        
+        entity.transform = transform
+        entity.isEnabled = true
+        
+        //let descriptionEntity = Entity.createText(anchor.referenceObject.name, height: textBaseHeight * axisScale)
+        //descriptionEntity.transform.translation.x = textBaseHeight * axisScale
+        //descriptionEntity.transform.translation.y = anchor.boundingBox.extent.y * 0.5
+        //entity.addChild(descriptionEntity)
+        self.entity = entity
+        
+        // Also instantiate the "hologram".
+        let hologram = Entity()
+        if let model {
+            let modelcopy = model.clone(recursive: true)
+            // Overwrite the model's appearance to a yellow wireframe.
             var wireframeMaterial = PhysicallyBasedMaterial()
             wireframeMaterial.triangleFillMode = .lines
             wireframeMaterial.faceCulling = .back
             wireframeMaterial.baseColor = .init(tint: .yellow)
-            wireframeMaterial.blending = .transparent(opacity: 0.5)
-            
-            model.applyMaterialRecursively(wireframeMaterial)
-            entity.addChild(model)
+            wireframeMaterial.blending = .transparent(opacity: 0.2)
+            modelcopy.applyMaterialRecursively(wireframeMaterial)
+            // Make the hologram slightly smaller so it fits "underneath" the model
+            modelcopy.transform.scale *= 1.10
+            hologram.addChild(modelcopy)
         }
+        hologram.transform = transform
+        hologram.isEnabled = hologram.isEnabled
         
-        boundingBoxOutline.entity.isEnabled = model == nil
-        
-        entity.addChild(originVisualization)
-        entity.addChild(boundingBoxOutline.entity)
-        
-        entity.transform = Transform(matrix: anchor.originFromAnchorTransform)
-        entity.isEnabled = anchor.isTracked
-        
-        let descriptionEntity = Entity.createText(anchor.referenceObject.name, height: textBaseHeight * axisScale)
-        descriptionEntity.transform.translation.x = textBaseHeight * axisScale
-        descriptionEntity.transform.translation.y = anchor.boundingBox.extent.y * 0.5
-        entity.addChild(descriptionEntity)
-        self.entity = entity
+        // Make the hologram grabbable
+        hologram.components.set(InputTargetComponent(allowedInputTypes: .indirect))
+        hologram.generateCollisionShapes(recursive: true)
+        self.hologram = hologram
     }
     
     func update(with anchor: ObjectAnchor) {
         entity.isEnabled = anchor.isTracked
+        if anchor.isTracked {
+            print("No longer tracked!")
+        }
         guard anchor.isTracked else { return }
         
         entity.transform = Transform(matrix: anchor.originFromAnchorTransform)
-        boundingBoxOutline.update(with: anchor)
+        //boundingBoxOutline.update(with: anchor)
+        if updateHologram {
+            hologram.transform = Transform(matrix: anchor.originFromAnchorTransform)
+        }
+    }
+    
+    func update(with transform: Transform) {
+        entity.transform = transform
+        
+        if updateHologram {
+            hologram.transform = transform
+        }
+    }
+    
+    func distanceToHologram() -> Float {
+        let pos1 = entity.transform.translation
+        let pos2 = hologram.transform.translation
+        let dx = pos2.x - pos1.x
+        let dy = pos2.y - pos1.y
+        let dz = pos2.z - pos1.z
+        return sqrt(dx * dx + dy * dy + dz * dz) // Using Float precision
     }
     
     @MainActor

@@ -10,10 +10,19 @@ import ARKit
 @MainActor
 @Observable
 class AppState {
+    var sessionController: SessionController?
+    
     var isImmersiveSpaceOpened = false
     
     let referenceObjectLoader = ReferenceObjectLoader()
 
+//    var playerName: String = UserDefaults.standard.string(forKey: "player-name") ?? "" {
+//        didSet {
+//            UserDefaults.standard.set(playerName, forKey: "player-name")
+//            sessionController?.localPlayer.name = playerName
+//        }
+//    }
+    
     func didLeaveImmersiveSpace() {
         // Stop the provider; the provider that just ran in the
         // immersive space is now in a paused state and isn't needed
@@ -28,6 +37,9 @@ class AppState {
     private let arkitSession = ARKitSession()
     
     private var objectTracking: ObjectTrackingProvider? = nil
+    
+    // Plane detection tracking
+    var planeDetection = PlaneDetectionProvider(alignments: [.horizontal])
     
     var objectTrackingStartedRunning = false
     
@@ -45,7 +57,8 @@ class AppState {
         // Run a new provider every time when entering the immersive space.
         let objectTracking = ObjectTrackingProvider(referenceObjects: referenceObjects)
         do {
-            try await arkitSession.run([objectTracking])
+            // Also add plane detection to the ARKit session.
+            try await arkitSession.run([objectTracking]) //, planeDetection])
         } catch {
             print("Error: \(error)" )
             return nil

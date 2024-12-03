@@ -9,6 +9,7 @@ import SwiftUI
 import ARKit
 import RealityKit
 import UniformTypeIdentifiers
+import GroupActivities
 
 struct HomeView: View {
     @Bindable var appState: AppState
@@ -80,6 +81,9 @@ struct HomeView: View {
                         .foregroundStyle(.secondary)
                         .font(.footnote)
                         .padding(.horizontal)
+                        
+                        // Add a share button to the object tracking demo.
+                        SharePlayButton().padding(.vertical, 20)
                     }
                 }
             }
@@ -201,6 +205,30 @@ struct HomeView: View {
                     Text("No object selected")
                 }
             }
+        }
+    }
+}
+
+struct SharePlayButton: View {
+    @StateObject
+    var groupStateObserver = GroupStateObserver()
+    
+    var body: some View {
+        ZStack {
+            ShareLink(
+                item: GuessTogetherActivity(),
+                preview: SharePreview("Guess Together!")
+            ).hidden()
+            
+            Button("Play Guess Together", systemImage: "shareplay") {
+                Task.detached {
+                    // Print a message
+                    print("Attempting to connect to activity.")
+                    try await GuessTogetherActivity().activate()
+                }
+            }
+            .disabled(!groupStateObserver.isEligibleForGroupSession)
+            .tint(.green)
         }
     }
 }
