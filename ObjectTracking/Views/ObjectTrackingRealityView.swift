@@ -157,10 +157,12 @@ struct ObjectTrackingRealityView: View {
                         
                 // Now that sessionController is guaranteed to be non-nil, safely access it
                 guard let sessionController = appState.sessionController else { return }
-                
+                appState.log("Listening for hologram updates")
                 // Recieve and respond to messages
                 for await (message, _) in sessionController.messenger.messages(of: SessionController.HologramUpdate.self) {
+                    
                     if let o = self.objectVisualizations[message.anchor_id] {
+                        appState.log("Received \(message.event) event for hologram with anchor ID \(message.anchor_id)")
                         switch message.event {
                         case .started:
                             // A remote hologram target is added
@@ -172,6 +174,8 @@ struct ObjectTrackingRealityView: View {
                             debug = "Recieved remote hologram ending"
                             o.updateHologram = true
                         }
+                    } else {
+                        appState.log("Received \(message.event) event for non-existent hologram with anchor ID \(message.anchor_id)")
                     }
                 }
             }
@@ -190,14 +194,14 @@ struct ObjectTrackingRealityView: View {
                     
                     switchLabel: switch anchorUpdate.event {
                     case .added:
-                        print("Adding!")
+                        appState.log("Adding!")
                         // In the event that the object tracker loses an object and then finds it again, it will send updates with a new anchor ID.
                         // To avoid this, if a new anchor has the object ID of an already-existing anchor, just change the existing visualization to use the new anchor ID.
                         for (i, o) in objectVisualizations where o.objectId == anchor.referenceObject.id {
                             o.hologram.name = id.uuidString
                             self.objectVisualizations[id] = o
                             objectVisualizations.removeValue(forKey: i)
-                            print("Object already existed, updating existing visualization")
+                            appState.log("Object already existed, updating existing visualization")
                             debug = "Re-adding object"
                             // Send a message that this object was added
                             Task {
@@ -245,7 +249,7 @@ struct ObjectTrackingRealityView: View {
                         if let o = objectVisualizations[id] {
                             //print("Status is ", o.updateHologram)
                             if o.updateHologram == false && !currentlyGrabbing && o.distanceToHologram() < 0.03 {
-                                print("Reconnecting!")
+                                appState.log("Reconnecting!")
                                 //o.hologram.playAudio(audio)
                                 o.updateHologram = true
                                 debug = "Reconnected"
@@ -271,7 +275,7 @@ struct ObjectTrackingRealityView: View {
                             }
                         }
                     case .removed:
-                        print("Removing!")
+                        appState.log("Removing!")
                         objectVisualizations[id]?.hologram.removeFromParent()
                         objectVisualizations[id]?.entity.removeFromParent()
                         objectVisualizations.removeValue(forKey: id)
@@ -313,13 +317,17 @@ struct ObjectTrackingRealityView: View {
                     // When dragging a hologram, update local position & prevent tracking updates from moving the hologram
                     // The entity actually "grabbed" by the gesture is a child of the hologram entity; go up the chain to get the hologram
                     if let entity = value.entity.parent?.parent?.parent {
-                        // print("Drag event triggered with parent", entity.parent?.name, ", name ", entity.name, " and id ", UUID(uuidString: entity.name)?.uuidString)
+                        //print("Drag event triggered with parent \(entity.parent?.name), name \(entity.name) and id \(UUID(uuidString: entity.name)?.uuidString)")
                         entity.position = value.convert(value.location3D, from: .local, to:entity.parent!)
                         // Stop updating hologram position locally
                         let id = UUID(uuidString: entity.name)
-                        if let id {
-                            print("Setting to be false!")
-                            objectVisualizations[id]?.updateHologram = false
+                        
+                        if let id,  let vis = objectVisualizations[id], vis.updateHologram {
+                            appState.log("Setting to be false!")
+                            vis.updateHologram = false
+                        }
+                        if !currentlyGrabbing {
+                            appState.log("Grabbed locally")
                         }
                         debug = "Grabbed locally"
                         currentlyGrabbing = true
@@ -330,17 +338,18 @@ struct ObjectTrackingRealityView: View {
                     // TODO: This part does not work for a remote user. If the remote user drags the hologram and then lets go, this task does not seem to run properly; a message is not sent back to the local user indicating the new hologram location.
                     currentlyGrabbing = false
                     Task {
-                        print("Drag ended")
+                        appState.log("Drag ended")
                         if let entity = value.entity.parent?.parent?.parent {
                             let id = UUID(uuidString: entity.name)
                             if let id {
-                                print("Setting to be false!")
+                                appState.log("Setting to be false!")
                                 objectVisualizations[id]?.updateHologram = false
                                 let message = SessionController.HologramUpdate(codedTransform: SessionController.CodableTransform(from: entity.transform), anchor_id: id, event: .started)
-                                print("Message event is ", message.event, ", anchor id is ", message.anchor_id, ", id is ", id.uuidString)
+                                appState.log("Sending Message event is \(message.event), anchor id is \(message.anchor_id), id is \( id.uuidString)")
                                 debug = "Sent start message"
                                 if let sessionController = appState.sessionController  {
                                     try? await sessionController.messenger.send(message)
+                                    appState.log("message sent")
                                 }
                             }
                         }

@@ -178,32 +178,42 @@ struct HomeView: View {
             .disabled(appState.isImmersiveSpaceOpened)
             
         } detail: {
-            if !appState.referenceObjectLoader.didFinishLoading {
-                VStack {
-                    Text("Loading reference objects…")
-                    ProgressView(value: appState.referenceObjectLoader.progress)
-                        .frame(maxWidth: 200)
-                }
-            } else if appState.referenceObjectLoader.referenceObjects.isEmpty {
-                Text("Tap the + button to add reference objects, or include some in the 'Reference Objects' group of the app's Xcode project.")
-            } else {
-                if let selectedObject = appState.referenceObjectLoader.referenceObjects.first(where: { $0.id == selectedReferenceObjectID }) {
-                    // Display the USDZ file that the reference object was displayed on in this detail view.
-                    if let path = selectedObject.usdzFile, !fileImporterIsOpen {
-                        Model3D(url: path) { model in
-                            model
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .scaleEffect(0.5)
-                        } placeholder: {
-                            ProgressView()
+            VStack {
+                if !appState.referenceObjectLoader.didFinishLoading {
+                    VStack {
+                        Text("Loading reference objects…")
+                        ProgressView(value: appState.referenceObjectLoader.progress)
+                            .frame(maxWidth: 200)
+                    }
+                } else if appState.referenceObjectLoader.referenceObjects.isEmpty {
+                    Text("Tap the + button to add reference objects, or include some in the 'Reference Objects' group of the app's Xcode project.")
+                } else if selectedReferenceObjectID == nil {
+                    Text("selectedReferenceObjectID is nil")
+                } else {
+                    if let selectedObject = appState.referenceObjectLoader.referenceObjects.first(where: { $0.id == selectedReferenceObjectID }) {
+                        // Display the USDZ file that the reference object was displayed on in this detail view.
+                        if let path = selectedObject.usdzFile, !fileImporterIsOpen {
+                            Model3D(url: path) { model in
+                                model
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .scaleEffect(0.5)
+                            } placeholder: {
+                                ProgressView()
+                            }
+                        } else {
+                            Text("No preview available")
                         }
                     } else {
-                        Text("No preview available")
+                        Text("No object selected")
                     }
-                } else {
-                    Text("No object selected")
                 }
+                
+                Divider()
+                Text("Log").bold().padding(.top)
+                ScrollView {
+                    Text(appState.logText).textSelection(.enabled)
+                }.padding()
             }
         }
     }

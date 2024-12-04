@@ -7,12 +7,20 @@ The app's overall state.
 
 import ARKit
 
+let timeFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.timeStyle = .medium
+    return formatter
+}()
+
 @MainActor
 @Observable
 class AppState {
     var sessionController: SessionController?
     
     var isImmersiveSpaceOpened = false
+    
+    var logText: String = ""
     
     let referenceObjectLoader = ReferenceObjectLoader()
 
@@ -32,6 +40,12 @@ class AppState {
         isImmersiveSpaceOpened = false
     }
 
+    func log(_ message: String) {
+        let msg = "\(timeFormatter.string(from: Date())) \(message)"
+        print(msg)
+        logText.append("\(msg)\n")
+    }
+    
     // MARK: - ARKit state
 
     private let arkitSession = ARKitSession()
