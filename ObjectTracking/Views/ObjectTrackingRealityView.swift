@@ -114,6 +114,8 @@ struct ObjectTrackingRealityView: View {
                         self.objectVisualizations[message.anchor_id] = visualization
                         root.addChild(visualization.entity)
                         root.addChild(visualization.hologram)
+                        // Set hologram mesh name as the anchor ID
+                        visualization.hologram.name = message.anchor_id.uuidString
                         visualization.hologram.spatialAudio = SpatialAudioComponent()
                         
                         // Add debug label
