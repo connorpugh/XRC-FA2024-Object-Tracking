@@ -76,7 +76,7 @@ class ObjectAnchorVisualization {
             wireframeMaterial.blending = .transparent(opacity: 0.2)
             modelcopy.applyMaterialRecursively(wireframeMaterial)
             // Make the hologram slightly smaller so it fits "underneath" the model
-            modelcopy.transform.scale *= 1.10
+            modelcopy.transform.scale *= 0.98
             hologram.addChild(modelcopy)
         }
         hologram.transform = transform

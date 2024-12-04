@@ -118,12 +118,12 @@ struct ObjectTrackingRealityView: View {
                         visualization.hologram.name = message.anchor_id.uuidString
                         visualization.hologram.spatialAudio = SpatialAudioComponent()
                         
-                        // Add debug label
-                        if let attachLabel = attachments.entity(for: "DebugLabel") {
-                            print("Added label")
-                            visualization.hologram.addChild(attachLabel)
-                            debug = "Added remotely!"
-                        }
+//                        // Add debug label
+//                        if let attachLabel = attachments.entity(for: "DebugLabel") {
+//                            print("Added label")
+//                            visualization.hologram.addChild(attachLabel)
+//                            debug = "Added remotely!"
+//                        }
                     case .updated:
                         // If hologram is not currently being grabbed & object is close enough to hologram, re-link them
                         if let o = objectVisualizations[message.anchor_id] {
@@ -238,12 +238,12 @@ struct ObjectTrackingRealityView: View {
                             }
                         }
                         
-                        // Add debug label to this hologram
-                        if let attachLabel = attachments.entity(for: "DebugLabel") {
-                            print("Added label")
-                            visualization.hologram.addChild(attachLabel)
-                            debug = "Added label!"
-                        }
+//                        // Add debug label to this hologram
+//                        if let attachLabel = attachments.entity(for: "DebugLabel") {
+//                            print("Added label")
+//                            visualization.hologram.addChild(attachLabel)
+//                            debug = "Added label!"
+//                        }
                         
                         
                     case .updated:
