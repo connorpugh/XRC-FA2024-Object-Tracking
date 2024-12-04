@@ -339,20 +339,28 @@ struct ObjectTrackingRealityView: View {
                     currentlyGrabbing = false
                     Task {
                         appState.log("Drag ended")
-                        if let entity = value.entity.parent?.parent?.parent {
-                            let id = UUID(uuidString: entity.name)
-                            if let id {
-                                appState.log("Setting to be false!")
-                                objectVisualizations[id]?.updateHologram = false
-                                let message = SessionController.HologramUpdate(codedTransform: SessionController.CodableTransform(from: entity.transform), anchor_id: id, event: .started)
-                                appState.log("Sending Message event is \(message.event), anchor id is \(message.anchor_id), id is \( id.uuidString)")
-                                debug = "Sent start message"
-                                if let sessionController = appState.sessionController  {
-                                    try? await sessionController.messenger.send(message)
-                                    appState.log("message sent")
-                                }
-                            }
+                        guard let entity = value.entity.parent?.parent?.parent else {
+                            appState.log("No entity found")
+                            return
                         }
+                        guard let id = UUID(uuidString: entity.name) else {
+                            appState.log("UUID could not be created")
+                            return
+                        }
+                        
+                        appState.log("Setting updateHologram to be false!")
+                        objectVisualizations[id]?.updateHologram = false
+                        let message = SessionController.HologramUpdate(codedTransform: SessionController.CodableTransform(from: entity.transform), anchor_id: id, event: .started)
+                        appState.log("Sending Message event is \(message.event), anchor id is \(message.anchor_id), id is \( id.uuidString)")
+                        debug = "Sent start message"
+                        guard let sessionController = appState.sessionController else {
+                            appState.log("No session controller")
+                            return
+                            
+                        }
+                        try? await sessionController.messenger.send(message)
+                        appState.log("message sent")
+                        
                     }
                 }
             )
