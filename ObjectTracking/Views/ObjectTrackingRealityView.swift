@@ -321,13 +321,18 @@ struct ObjectTrackingRealityView: View {
                         entity.position = value.convert(value.location3D, from: .local, to:entity.parent!)
                         // Stop updating hologram position locally
                         let id = UUID(uuidString: entity.name)
-                        
+                       
+                    
                         if let id,  let vis = objectVisualizations[id], vis.updateHologram {
-                            appState.log("Setting to be false!")
+                            appState.log("Setting updateHologram to be false!")
                             vis.updateHologram = false
                         }
+                        
                         if !currentlyGrabbing {
                             appState.log("Grabbed locally")
+                            if id == nil {
+                                appState.log("ID is nil for \(entity.name)")
+                            }
                         }
                         debug = "Grabbed locally"
                         currentlyGrabbing = true
@@ -344,7 +349,7 @@ struct ObjectTrackingRealityView: View {
                             return
                         }
                         guard let id = UUID(uuidString: entity.name) else {
-                            appState.log("UUID could not be created")
+                            appState.log("UUID could not be created for \(entity.name)")
                             return
                         }
                         
@@ -356,7 +361,6 @@ struct ObjectTrackingRealityView: View {
                         guard let sessionController = appState.sessionController else {
                             appState.log("No session controller")
                             return
-                            
                         }
                         try? await sessionController.messenger.send(message)
                         appState.log("message sent")
