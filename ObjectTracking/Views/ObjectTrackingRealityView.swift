@@ -101,6 +101,7 @@ struct ObjectTrackingRealityView: View {
                         for (i, o) in objectVisualizations where o.objectId == message.object_id {
                             // The hologram is named after the anchor ID so it can be identified during grab gestures
                             o.hologram.name = message.anchor_id.uuidString
+                            appState.log("Object already existed, updating existing visualization for \(o.hologram.name)")
                             self.objectVisualizations[message.anchor_id] = o
                             objectVisualizations.removeValue(forKey: i)
                             print("Object already existed, updating existing visualization")
@@ -116,6 +117,8 @@ struct ObjectTrackingRealityView: View {
                         root.addChild(visualization.hologram)
                         // Set hologram mesh name as the anchor ID
                         visualization.hologram.name = message.anchor_id.uuidString
+                        appState.log("created visualization \(visualization.hologram.name)")
+                       
                         visualization.hologram.spatialAudio = SpatialAudioComponent()
                         
 //                        // Add debug label
@@ -228,6 +231,7 @@ struct ObjectTrackingRealityView: View {
                         root.addChild(visualization.hologram)
                         // Set hologram mesh name as the anchor ID
                         visualization.hologram.name = id.uuidString
+                        appState.log("assigned visualization \(visualization.hologram.name)")
                         // Add spatial audio component
                         visualization.hologram.spatialAudio = SpatialAudioComponent()
                         // Send a message that this object was added
@@ -316,8 +320,10 @@ struct ObjectTrackingRealityView: View {
             DragGesture()
                 .targetedToAnyEntity()
                 .onChanged { value in
+                    
                     // When dragging a hologram, update local position & prevent tracking updates from moving the hologram
                     // The entity actually "grabbed" by the gesture is a child of the hologram entity; go up the chain to get the hologram
+                   
                     if let entity = value.entity.parent?.parent?.parent {
                         //print("Drag event triggered with parent \(entity.parent?.name), name \(entity.name) and id \(UUID(uuidString: entity.name)?.uuidString)")
                         entity.position = value.convert(value.location3D, from: .local, to:entity.parent!)
@@ -332,6 +338,12 @@ struct ObjectTrackingRealityView: View {
                         
                         if !currentlyGrabbing {
                             appState.log("Grabbed locally")
+                            var e = value.entity
+                            appState.log("Entity is \(e.name)")
+                            while let p = e.parent {
+                                appState.log("Parent is \(p.name)")
+                                e = p
+                            }
                             if id == nil {
                                 appState.log("ID is nil for \(entity.name)")
                             }
