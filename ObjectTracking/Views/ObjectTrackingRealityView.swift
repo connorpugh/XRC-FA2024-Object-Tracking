@@ -27,6 +27,18 @@ struct ObjectTrackingRealityView: View {
     // The value of this string is printed on a label that follows the active hologram around.
     @State private var debug = ""
     
+    func parentWithUUID(_ entity: Entity) -> Entity? {
+        var e = entity
+        while let p = e.parent {
+            if UUID(uuidString: p.name) != nil {
+                return p
+            }
+            e = p
+        }
+        return nil
+    }
+    
+        
 
     var body: some View {
         RealityView { content, attachments in
@@ -324,32 +336,32 @@ struct ObjectTrackingRealityView: View {
                     // When dragging a hologram, update local position & prevent tracking updates from moving the hologram
                     // The entity actually "grabbed" by the gesture is a child of the hologram entity; go up the chain to get the hologram
                    
-                    if let entity = value.entity.parent?.parent?.parent {
+                    if let entity = parentWithUUID(value.entity) {
                         //print("Drag event triggered with parent \(entity.parent?.name), name \(entity.name) and id \(UUID(uuidString: entity.name)?.uuidString)")
                         entity.position = value.convert(value.location3D, from: .local, to:entity.parent!)
                         // Stop updating hologram position locally
                         let id = UUID(uuidString: entity.name)
                        
                     
-                        if let id,  let vis = objectVisualizations[id], vis.updateHologram {
-                            appState.log("Setting updateHologram to be false!")
-                            vis.updateHologram = false
+                        if let id,  let vis = objectVisualizations[id] {
+                            if vis.updateHologram {
+                                appState.log("Setting updateHologram to be false!")
+                                vis.updateHologram = false
+                            }
+                        } else  if !currentlyGrabbing  {
+                            appState.log("No visualization found for \(entity.name)")
+                            for (i, o) in objectVisualizations {
+                                appState.log("Have \(i)")
+                            }
+                                
                         }
                         
                         if !currentlyGrabbing {
                             appState.log("Grabbed locally")
-                            var e = value.entity
-                            appState.log("Entity is \(e.name)")
-                            while let p = e.parent {
-                                appState.log("Parent is \(p.name)")
-                                e = p
-                            }
-                            if id == nil {
-                                appState.log("ID is nil for \(entity.name)")
-                            }
+                            debug = "Grabbed locally"
+                            currentlyGrabbing = true
                         }
-                        debug = "Grabbed locally"
-                        currentlyGrabbing = true
+                      
                     }
                 }
                 .onEnded { value in
@@ -358,7 +370,7 @@ struct ObjectTrackingRealityView: View {
                     currentlyGrabbing = false
                     Task {
                         appState.log("Drag ended")
-                        guard let entity = value.entity.parent?.parent?.parent else {
+                        guard let entity = parentWithUUID(value.entity) else {
                             appState.log("No entity found")
                             return
                         }
@@ -366,9 +378,10 @@ struct ObjectTrackingRealityView: View {
                             appState.log("UUID could not be created for \(entity.name)")
                             return
                         }
-                        
-                        appState.log("Setting updateHologram to be false!")
-                        objectVisualizations[id]?.updateHologram = false
+                        if let vis = objectVisualizations[id] {
+                            appState.log("Setting updateHologram to be false!")
+                            vis.updateHologram = false
+                        }
                         let message = SessionController.HologramUpdate(codedTransform: SessionController.CodableTransform(from: entity.transform), anchor_id: id, event: .started)
                         appState.log("Sending Message event is \(message.event), anchor id is \(message.anchor_id), id is \( id.uuidString)")
                         debug = "Sent start message"
