@@ -13,6 +13,7 @@ let timeFormatter: DateFormatter = {
     return formatter
 }()
 
+
 @MainActor
 @Observable
 class AppState {
@@ -21,7 +22,11 @@ class AppState {
     var isImmersiveSpaceOpened = false
     
     var logText: String = ""
-    
+    var lastTimeOptionalLogged: Date?
+    var lastTimeHeld: Date = Date()
+
+    var lastHeld: String? = nil
+
     let referenceObjectLoader = ReferenceObjectLoader()
 
 //    var playerName: String = UserDefaults.standard.string(forKey: "player-name") ?? "" {
@@ -39,11 +44,51 @@ class AppState {
         arkitSession.stop()
         isImmersiveSpaceOpened = false
     }
-
-    func log(_ message: String) {
-        let msg = "\(timeFormatter.string(from: Date())) \(message)"
+    
+    func log(_ now: Date,_ message: String) {
+        let msg = "\(timeFormatter.string(from: now)) \(message)"
         print(msg)
         logText.append("\(msg)\n")
+    }
+    
+    func log(message: SessionController.HologramUpdate, id: UUID, optional: Bool = false) {
+        if message.anchor_id.uuidString == id.uuidString {
+            log("Sending HologramUpdate \(message.event), id is \( id.uuidString.prefix(12))...", optional: optional)
+        }
+        else {
+            log("Sending HologramUpdate \(message.event), anchor id is \(message.anchor_id.uuidString.prefix(12))..., id is \( id.uuidString.prefix(12))...", optional: optional)
+        }
+    }
+    func log(message: SessionController.TrackingUpdate, id: UUID, optional: Bool = false) {
+        
+        if message.anchor_id.uuidString == id.uuidString {
+            log("Sending \(message.event), id is \( id.uuidString.prefix(12))...", optional: optional)
+        }
+        else {
+            log("Sending \(message.event), anchor id is \(message.anchor_id.uuidString.prefix(12))..., id is \( id.uuidString.prefix(12))...", optional: optional)
+        }
+        
+    }
+    //
+    
+    func log(_ message: String, optional: Bool = false) {
+        let now = Date()
+        if let lastTimeOptionalLogged, optional, now.timeIntervalSince(lastTimeOptionalLogged) < 5 {
+            lastTimeHeld = now
+            lastHeld = message
+            return
+        }
+        
+        if let lastHeld, lastHeld != message {
+            log(lastTimeHeld, lastHeld)
+        }
+        lastHeld = nil
+        log(now, message)
+        if optional {
+            lastTimeOptionalLogged = now
+        } else {
+            lastTimeOptionalLogged = nil
+        }
     }
     
     // MARK: - ARKit state

@@ -208,12 +208,11 @@ struct HomeView: View {
                         Text("No object selected")
                     }
                 }
-                
                 Divider()
                 Text("Log").bold().padding(.top)
                 ScrollView {
                     Text(appState.logText).textSelection(.enabled)
-                }.padding()
+                }.defaultScrollAnchor(.bottom).padding()
             }
         }
     }

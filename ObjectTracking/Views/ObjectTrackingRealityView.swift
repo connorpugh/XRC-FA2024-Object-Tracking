@@ -287,9 +287,12 @@ struct ObjectTrackingRealityView: View {
                         Task {
                             let transform = Transform(matrix: anchor.originFromAnchorTransform)
                             let message = SessionController.TrackingUpdate(codedTransform: SessionController.CodableTransform(from: transform), anchor_id: id, object_id: anchor.referenceObject.id, event: .updated)
-                            //print("Message event is ", message.event, ", anchor id is ", message.anchor_id, ", object id is ", message.object_id)
+                            appState.log(message: message, id: id, optional: true)
+                            
                             if let sessionController = appState.sessionController  {
                                 try? await sessionController.messenger.send(message)
+                                appState.log("message sent", optional: true)
+                                
                             }
                         }
                     case .removed:
@@ -300,8 +303,12 @@ struct ObjectTrackingRealityView: View {
                         // Send a message that this object was removed
                         Task {
                             let message = SessionController.TrackingUpdate(codedTransform: SessionController.CodableTransform(from: .identity), anchor_id: id, object_id: anchor.referenceObject.id, event: .removed)
+                            appState.log(message: message, id: id, optional: false)
+                            
                             if let sessionController = appState.sessionController {
+                                 
                                 try? await sessionController.messenger.send(message)
+                                appState.log("message sent")
                             }
                         }
                     }
@@ -383,7 +390,8 @@ struct ObjectTrackingRealityView: View {
                             vis.updateHologram = false
                         }
                         let message = SessionController.HologramUpdate(codedTransform: SessionController.CodableTransform(from: entity.transform), anchor_id: id, event: .started)
-                        appState.log("Sending Message event is \(message.event), anchor id is \(message.anchor_id), id is \( id.uuidString)")
+                        appState.log(message: message, id: id, optional: false)
+                        
                         debug = "Sent start message"
                         guard let sessionController = appState.sessionController else {
                             appState.log("No session controller")
