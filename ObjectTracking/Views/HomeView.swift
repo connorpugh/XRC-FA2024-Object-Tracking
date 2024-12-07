@@ -39,7 +39,7 @@ struct HomeView: View {
         }
         .glassBackgroundEffect()
         .toolbar {
-            ToolbarItem(placement: .bottomOrnament) {
+            ToolbarItemGroup(placement: .bottomOrnament) {
                 if appState.canEnterImmersiveSpace {
                     VStack {
                         if !appState.isImmersiveSpaceOpened {
@@ -76,16 +76,16 @@ struct HomeView: View {
                         
                         Text(appState.isImmersiveSpaceOpened ?
                              "This leaves the immersive space." :
-                             "This enters an immersive space, hiding all other apps."
+                                "This enters an immersive space, hiding all other apps."
                         )
                         .foregroundStyle(.secondary)
                         .font(.footnote)
                         .padding(.horizontal)
-                        
+                    }
                         // Add a share button to the object tracking demo.
                         SharePlayButton().padding(.vertical, 20)
                         
-                        Divider()
+                       
                         Button(action: {
                                         appState.defineBoundaries.toggle()
                                     }) {
@@ -98,7 +98,7 @@ struct HomeView: View {
                                         Text(appState.automaticTargetPlacement ? "Auto Targets: ON" : "Auto Targets: OFF")
                                     }
                                     .padding()
-                    }
+                    
                 }
             }
         }
