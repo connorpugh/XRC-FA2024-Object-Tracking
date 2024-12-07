@@ -28,6 +28,9 @@ class AppState {
     var lastHeld: String? = nil
 
     let referenceObjectLoader = ReferenceObjectLoader()
+    
+    // Bool defining whether the app is in boundary definition mode.
+    var defineBoundaries: Bool = false
 
 //    var playerName: String = UserDefaults.standard.string(forKey: "player-name") ?? "" {
 //        didSet {
@@ -35,6 +38,8 @@ class AppState {
 //            sessionController?.localPlayer.name = playerName
 //        }
 //    }
+    
+    var automaticTargetPlacement: Bool = false
     
     func didLeaveImmersiveSpace() {
         // Stop the provider; the provider that just ran in the

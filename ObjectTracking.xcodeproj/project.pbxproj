@@ -16,6 +16,7 @@
 		366534AC2CD0476A00DED3FD /* GuessTogetherActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366534A52CD0476A00DED3FD /* GuessTogetherActivity.swift */; };
 		366534AD2CD0476A00DED3FD /* SessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366534A62CD0476A00DED3FD /* SessionController.swift */; };
 		366534AF2CD0A40000DED3FD /* PlayerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 366534AE2CD0A40000DED3FD /* PlayerModel.swift */; };
+		369CC1962D04D91C00D0A0F0 /* BoundaryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 369CC1952D04D91800D0A0F0 /* BoundaryManager.swift */; };
 		36A3A9742CD0CDFD00F4E003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 36A3A9732CD0CCB100F4E003 /* Assets.xcassets */; };
 		36A3A9782CD1BE1200F4E003 /* juniormints.referenceobject in Sources */ = {isa = PBXBuildFile; fileRef = 36A3A9772CD1BE1200F4E003 /* juniormints.referenceobject */; };
 		393E4AB02A9629A7005C9691 /* Entity+ObjectTracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393E4AAF2A9629A7005C9691 /* Entity+ObjectTracking.swift */; };
@@ -40,6 +41,7 @@
 		366534A72CD0476A00DED3FD /* SessionController+RemoteParticipantSynchronization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionController+RemoteParticipantSynchronization.swift"; sourceTree = "<group>"; };
 		366534A82CD0476A00DED3FD /* SessionController+PlayerOrder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SessionController+PlayerOrder.swift"; sourceTree = "<group>"; };
 		366534AE2CD0A40000DED3FD /* PlayerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerModel.swift; sourceTree = "<group>"; };
+		369CC1952D04D91800D0A0F0 /* BoundaryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoundaryManager.swift; sourceTree = "<group>"; };
 		36A3A9732CD0CCB100F4E003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		36A3A9772CD1BE1200F4E003 /* juniormints.referenceobject */ = {isa = PBXFileReference; lastKnownFileType = file.referenceobject; path = juniormints.referenceobject; sourceTree = "<group>"; };
 		393E4AAD2A96284F005C9691 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -157,6 +159,7 @@
 				361F9D4C2CE47BFF00AB9C35 /* PlaneAnchorHandler.swift */,
 				EBA142DE2AD431AD00FB20AD /* HomeView.swift */,
 				EBDA9DAB2AD44D140040C78E /* ObjectTrackingRealityView.swift */,
+				369CC1952D04D91800D0A0F0 /* BoundaryManager.swift */,
 				EB5034142AF137FA0020B48F /* InfoLabel.swift */,
 				E18F5F992BBD6C6500D9BFF2 /* ListEntryView.swift */,
 			);
@@ -272,6 +275,7 @@
 				366534AB2CD0476A00DED3FD /* SessionController+PlayerOrder.swift in Sources */,
 				366534AC2CD0476A00DED3FD /* GuessTogetherActivity.swift in Sources */,
 				366534AD2CD0476A00DED3FD /* SessionController.swift in Sources */,
+				369CC1962D04D91C00D0A0F0 /* BoundaryManager.swift in Sources */,
 				EBE296552AE27E5900F6838C /* AppState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

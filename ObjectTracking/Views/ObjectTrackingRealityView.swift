@@ -9,6 +9,7 @@ import RealityKit
 import ARKit
 import SwiftUI
 import GroupActivities
+import simd
 
 @MainActor
 struct ObjectTrackingRealityView: View {
@@ -24,6 +25,40 @@ struct ObjectTrackingRealityView: View {
     
     @State private var currentlyGrabbing = false
     
+    // Create boundary manager
+    let boundary = BoundaryManager(center: SIMD3<Float>(0.0, 0.0, 0.0))
+    // Picks a new location within bounds that is a given distance away from its current location, then moves the entity to that location.
+    func pickNewTarget(target: ObjectAnchorVisualization) async {
+        
+        // Get new location
+        let newTargetPosition = boundary.randomDistantPoint(from: target.hologram.transform.translation, minDistance: 0.2)
+        // Make sure the target is detached from the object
+        target.updateHologram = false
+        // Move target to location
+        target.hologram.transform.translation = newTargetPosition ?? target.hologram.transform.translation
+        
+        appState.log("Created new target position at \(newTargetPosition ?? SIMD3<Float>(9.0, 9.0, 9.0))")
+        
+        // Get the anchor ID
+        if let id = UUID(uuidString: target.hologram.name) {
+            // Send message indicating change in position
+            let message = SessionController.HologramUpdate(codedTransform: SessionController.CodableTransform(from: target.hologram.transform), anchor_id: id, event: .started)
+            appState.log(message: message, id: id, optional: false)
+            
+            debug = "Sent start message"
+            guard let sessionController = appState.sessionController else {
+                appState.log("No session controller")
+                return
+            }
+            try? await sessionController.messenger.send(message)
+            appState.log("message sent")
+        } else {
+            appState.log("Error: Couldn't get anchor ID")
+        }
+        
+        
+    }
+    
     // The value of this string is printed on a label that follows the active hologram around.
     @State private var debug = ""
     
@@ -37,11 +72,14 @@ struct ObjectTrackingRealityView: View {
         }
         return nil
     }
-    
-        
 
     var body: some View {
         RealityView { content, attachments in
+            // Clear the visualizations of past runs
+            objectVisualizations.removeAll()
+            
+            
+            
             content.add(root)
             
             //
@@ -92,6 +130,8 @@ struct ObjectTrackingRealityView: View {
 //                    
 //                }
 //            }
+            
+            
             
             // Remote object tracking updates from other SharePlay users
             Task {
@@ -148,6 +188,12 @@ struct ObjectTrackingRealityView: View {
                                 //o.hologram.playAudio(audio)
                                 o.updateHologram = true
                                 debug = "Reconnected remotely"
+                                
+                                if appState.automaticTargetPlacement {
+                                    Task {
+                                        await pickNewTarget(target: o)
+                                    }
+                                }
                             }
                         }
                         
@@ -196,6 +242,40 @@ struct ObjectTrackingRealityView: View {
                     }
                 }
             }
+            
+            
+            var lastDefineBoundaries = false
+            // Update boundaries every 0.2 seconds if defineBoundaries is true
+            Task {
+                while !Task.isCancelled {
+                    // Call the updateBoundaryState function
+                    // If defineBoundaries was just turned on
+                    if appState.defineBoundaries && !lastDefineBoundaries {
+                        // Find the first object in the visualizations list
+                        if let first = objectVisualizations.first?.value {
+                            // Reset the boundaries around this object
+                            boundary.reset(to: first.entity.transform.translation)
+                            
+                        }
+                    }
+                    // If defineBoundaries is on
+                    if appState.defineBoundaries {
+                        // For each object in the visualizations list
+                        for (_, value) in objectVisualizations {
+                            // Extend the boundary towards its location
+                            boundary.addPoint(value.entity.transform.translation)
+                        }
+                    }
+                    
+                    lastDefineBoundaries = appState.defineBoundaries
+                    
+                    // print("The current bounds are \(boundary.min_bounds) to \(boundary.max_bounds)")
+                    
+                    // Add a delay between repetitions
+                    try? await Task.sleep(nanoseconds: UInt64(0.2)*1_000_000_000) // 0.2 second interval
+                }
+            }
+
 
             // Local object tracking updates
             Task {
@@ -271,6 +351,12 @@ struct ObjectTrackingRealityView: View {
                                 //o.hologram.playAudio(audio)
                                 o.updateHologram = true
                                 debug = "Reconnected"
+                                
+                                if appState.automaticTargetPlacement {
+                                    Task {
+                                        await pickNewTarget(target: o)
+                                    }
+                                }
                             }
                             
 //                            if o.updateHologram == false {

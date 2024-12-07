@@ -84,6 +84,20 @@ struct HomeView: View {
                         
                         // Add a share button to the object tracking demo.
                         SharePlayButton().padding(.vertical, 20)
+                        
+                        Divider()
+                        Button(action: {
+                                        appState.defineBoundaries.toggle()
+                                    }) {
+                                        Text(appState.defineBoundaries ? "Stop Defining Boundaries" : "Define Boundaries")
+                                    }
+                                    .padding()
+                        Button(action: {
+                            appState.automaticTargetPlacement.toggle()
+                                    }) {
+                                        Text(appState.automaticTargetPlacement ? "Auto Targets: ON" : "Auto Targets: OFF")
+                                    }
+                                    .padding()
                     }
                 }
             }
@@ -166,6 +180,8 @@ struct HomeView: View {
                 }
                 .navigationTitle("Reference objects")
 
+                
+                
                 Button {
                     fileImporterIsOpen = true
                 } label: {
@@ -213,6 +229,7 @@ struct HomeView: View {
                 ScrollView {
                     Text(appState.logText).textSelection(.enabled)
                 }.defaultScrollAnchor(.bottom).padding()
+    
             }
         }
     }
