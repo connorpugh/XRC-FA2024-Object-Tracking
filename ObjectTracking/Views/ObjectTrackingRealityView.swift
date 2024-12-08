@@ -95,7 +95,7 @@ struct ObjectTrackingRealityView: View {
 
             do {
                 // Attempt to load the audio file
-                audio = try await AudioFileResource.load(named: "ding.mp3")
+                audio = try AudioFileResource.load(named: "ding.mp3")
             } catch {
                 print("Failed to load audio: \(error)")
                 // Provide fallback or handle error
@@ -167,7 +167,7 @@ struct ObjectTrackingRealityView: View {
                 
                 // Recieve and respond to messages
                 for await (message, _) in sessionController.messenger.messages(of: SessionController.TrackingUpdate.self) {
-                    switch message.event {
+                    switchLabel: switch message.event {
                     case .added:
                         print("Received remote add event")
                         // In the event that the object tracker loses an object and then finds it again, it will send updates with a new anchor ID.
@@ -182,7 +182,7 @@ struct ObjectTrackingRealityView: View {
                             objectVisualizations.removeValue(forKey: i)
                             print("Object already existed, updating existing visualization")
                             debug = "Added remotely when already existed"
-                            break
+                            break switchLabel
                         }
                         
                         // Add a remote object
@@ -354,6 +354,7 @@ struct ObjectTrackingRealityView: View {
                                     try? await sessionController.messenger.send(message)
                                 }
                             }
+                            
                             break switchLabel
                         }
                         // Create a new visualization for the reference object that ARKit just detected.
@@ -377,6 +378,7 @@ struct ObjectTrackingRealityView: View {
                         visualization.hologram.spatialAudio = SpatialAudioComponent()
                         // Send a message that this object was added
                         Task {
+                            appState.log("Sending an add message \(visualization.hologram.name)")
                             let message = SessionController.TrackingUpdate(anchor_id: id, object_id: anchor.referenceObject.id, event: .added)
                             if let sessionController = appState.sessionController {
                                 try? await sessionController.messenger.send(message)
