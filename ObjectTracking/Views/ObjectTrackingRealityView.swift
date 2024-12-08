@@ -189,10 +189,12 @@ struct ObjectTrackingRealityView: View {
                         let model = appState.referenceObjectLoader.usdzsPerReferenceObjectID[message.object_id]
                         let visualization = ObjectAnchorVisualization(for: message.codedTransform.toTransform(), withModel: model)
                         self.objectVisualizations[message.anchor_id] = visualization
+                        
                         root.addChild(visualization.entity)
                         root.addChild(visualization.hologram)
                         root.addChild(visualization.hologramVisual)
                         // Set hologram mesh name as the anchor ID
+                        visualization.objectId = message.object_id
                         visualization.hologram.name = message.anchor_id.uuidString
                         visualization.hologramVisual.name = message.anchor_id.uuidString
                         appState.log("created visualization \(visualization.hologram.name)")
