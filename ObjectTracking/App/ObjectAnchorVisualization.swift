@@ -29,7 +29,7 @@ class ObjectAnchorVisualization {
     var hiddenMaterial: PhysicallyBasedMaterial
     
 
-    init(for anchor: ObjectAnchor, withModel model: Entity? = nil) {
+    init(for anchor: ObjectAnchor, withModel model: Entity? = nil, remote: Bool = false) {
         //boundingBoxOutline = BoundingBoxOutline(anchor: anchor, alpha: alpha)
         let transform = Transform(matrix: anchor.originFromAnchorTransform)
         
@@ -58,7 +58,9 @@ class ObjectAnchorVisualization {
         hiddenMaterial.blending = .transparent(opacity: 0.0)
         
         if let model {
-            model.applyMaterialRecursively(baseMaterial)
+            if !remote {
+                model.applyMaterialRecursively(baseMaterial)
+            }
             entity.addChild(model)
         }
         
@@ -102,7 +104,7 @@ class ObjectAnchorVisualization {
         self.hologramVisual = hologramVisual
     }
     
-    init(for transform: Transform, withModel model: Entity? = nil) {
+    init(for transform: Transform, withModel model: Entity? = nil, remote: Bool = false) {
         //boundingBoxOutline = BoundingBoxOutline(anchor: anchor, alpha: alpha)
         
         let entity = Entity()
@@ -128,7 +130,9 @@ class ObjectAnchorVisualization {
         hiddenMaterial.blending = .transparent(opacity: 0.0)
         
         if let model {
-            model.applyMaterialRecursively(baseMaterial)
+            if !remote {
+                model.applyMaterialRecursively(baseMaterial)
+            }
             entity.addChild(model)
         }
         

@@ -187,7 +187,7 @@ struct ObjectTrackingRealityView: View {
                         
                         // Add a remote object
                         let model = appState.referenceObjectLoader.usdzsPerReferenceObjectID[message.object_id]
-                        let visualization = ObjectAnchorVisualization(for: message.codedTransform.toTransform(), withModel: model)
+                        let visualization = ObjectAnchorVisualization(for: message.codedTransform.toTransform(), withModel: model, remote: true)
                         self.objectVisualizations[message.anchor_id] = visualization
                         
                         root.addChild(visualization.entity)
