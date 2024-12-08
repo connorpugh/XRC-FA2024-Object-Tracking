@@ -55,6 +55,9 @@ struct HomeView: View {
                                     @unknown default:
                                         break
                                     }
+                                    
+                                    // Disable boundary building
+                                    appState.defineBoundaries = false
                                 }
                             }
                             .disabled(!appState.canEnterImmersiveSpace || appState.referenceObjectLoader.enabledReferenceObjectsCount == 0)
@@ -63,6 +66,9 @@ struct HomeView: View {
                                 Task {
                                     await dismissImmersiveSpace()
                                     appState.didLeaveImmersiveSpace()
+                                    
+                                    // Disable boundary building
+                                    appState.defineBoundaries = false
                                 }
                             }
                             
@@ -92,6 +98,7 @@ struct HomeView: View {
                                         Text(appState.defineBoundaries ? "Stop Defining Boundaries" : "Define Boundaries")
                                     }
                                     .padding()
+                                    .disabled(!appState.isImmersiveSpaceOpened)
                         Button(action: {
                             appState.automaticTargetPlacement.toggle()
                                     }) {

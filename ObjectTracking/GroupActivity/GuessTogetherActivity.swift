@@ -13,7 +13,7 @@ struct GuessTogetherActivity: GroupActivity, Transferable {
     
     var metadata: GroupActivityMetadata = {
         var metadata = GroupActivityMetadata()
-        metadata.title = "Guess Together"
+        metadata.title = "Object Tracking"
         return metadata
     }()
 }

@@ -34,8 +34,20 @@ struct ObjectTrackingRealityView: View {
         let newTargetPosition = boundary.randomDistantPoint(from: target.hologram.transform.translation, minDistance: 0.2)
         // Make sure the target is detached from the object
         target.updateHologram = false
-        // Move target to location
-        target.hologram.transform.translation = newTargetPosition ?? target.hologram.transform.translation
+        // Construct a new Transform with the new position and current scale & rotation
+        if let newPosition = newTargetPosition {
+            let currentTransform = target.hologram.transform
+            let newTransform = Transform(
+                scale: currentTransform.scale,
+                rotation: currentTransform.rotation,
+                translation: newPosition
+            )
+            // Move target to location
+            target.setHologramSmooth(with: newTransform)
+        } else {
+            // Fall back to the current transform if new position is nil
+            target.setHologramSmooth(with: target.hologram.transform)
+        }
         
         appState.log("Created new target position at \(newTargetPosition ?? SIMD3<Float>(9.0, 9.0, 9.0))")
         
@@ -153,6 +165,8 @@ struct ObjectTrackingRealityView: View {
                         for (i, o) in objectVisualizations where o.objectId == message.object_id {
                             // The hologram is named after the anchor ID so it can be identified during grab gestures
                             o.hologram.name = message.anchor_id.uuidString
+                            o.hologramVisual.name = message.anchor_id.uuidString
+
                             appState.log("Object already existed, updating existing visualization for \(o.hologram.name)")
                             self.objectVisualizations[message.anchor_id] = o
                             objectVisualizations.removeValue(forKey: i)
@@ -167,11 +181,21 @@ struct ObjectTrackingRealityView: View {
                         self.objectVisualizations[message.anchor_id] = visualization
                         root.addChild(visualization.entity)
                         root.addChild(visualization.hologram)
+                        root.addChild(visualization.hologramVisual)
                         // Set hologram mesh name as the anchor ID
                         visualization.hologram.name = message.anchor_id.uuidString
+                        visualization.hologramVisual.name = message.anchor_id.uuidString
                         appState.log("created visualization \(visualization.hologram.name)")
                        
                         visualization.hologram.spatialAudio = SpatialAudioComponent()
+                        
+                        // If autoTargets is on, create a target for it
+                        if appState.automaticTargetPlacement {
+                            Task {
+                                await pickNewTarget(target: visualization)
+                            }
+                            
+                        }
                         
 //                        // Add debug label
 //                        if let attachLabel = attachments.entity(for: "DebugLabel") {
@@ -230,7 +254,7 @@ struct ObjectTrackingRealityView: View {
                         case .started:
                             // A remote hologram target is added
                             debug = "Recieved remote hologram target"
-                            o.hologram.transform = message.codedTransform.toTransform()
+                            o.setHologram(with: message.codedTransform.toTransform())
                             o.updateHologram = false
                         case .ended:
                             // A remote hologram target is ended (currently unused)
@@ -243,6 +267,10 @@ struct ObjectTrackingRealityView: View {
                 }
             }
             
+            boundary.initializeWireframe()
+            if boundary.wireframeBox != nil {
+                content.add(boundary.wireframeBox!)
+            }
             
             var lastDefineBoundaries = false
             // Update boundaries every 0.2 seconds if defineBoundaries is true
@@ -265,6 +293,8 @@ struct ObjectTrackingRealityView: View {
                             // Extend the boundary towards its location
                             boundary.addPoint(value.entity.transform.translation)
                         }
+                        // Update the visualization
+                        boundary.updateWireframe()
                     }
                     
                     lastDefineBoundaries = appState.defineBoundaries
@@ -275,6 +305,8 @@ struct ObjectTrackingRealityView: View {
                     try? await Task.sleep(nanoseconds: UInt64(0.2)*1_000_000_000) // 0.2 second interval
                 }
             }
+            
+            // 
 
 
             // Local object tracking updates
@@ -296,6 +328,8 @@ struct ObjectTrackingRealityView: View {
                         // To avoid this, if a new anchor has the object ID of an already-existing anchor, just change the existing visualization to use the new anchor ID.
                         for (i, o) in objectVisualizations where o.objectId == anchor.referenceObject.id {
                             o.hologram.name = id.uuidString
+                            o.hologramVisual.name = id.uuidString
+
                             self.objectVisualizations[id] = o
                             objectVisualizations.removeValue(forKey: i)
                             appState.log("Object already existed, updating existing visualization")
@@ -321,8 +355,10 @@ struct ObjectTrackingRealityView: View {
                         self.objectVisualizations[id] = visualization
                         root.addChild(visualization.entity)
                         root.addChild(visualization.hologram)
+                        root.addChild(visualization.hologramVisual)
                         // Set hologram mesh name as the anchor ID
                         visualization.hologram.name = id.uuidString
+                        visualization.hologramVisual.name = id.uuidString
                         appState.log("assigned visualization \(visualization.hologram.name)")
                         // Add spatial audio component
                         visualization.hologram.spatialAudio = SpatialAudioComponent()
@@ -437,6 +473,7 @@ struct ObjectTrackingRealityView: View {
                        
                     
                         if let id,  let vis = objectVisualizations[id] {
+                            
                             if vis.updateHologram {
                                 appState.log("Setting updateHologram to be false!")
                                 vis.updateHologram = false
@@ -455,6 +492,8 @@ struct ObjectTrackingRealityView: View {
                             currentlyGrabbing = true
                         }
                       
+                    } else {
+                        appState.log("This name does not match a UUID!")
                     }
                 }
                 .onEnded { value in
@@ -474,6 +513,8 @@ struct ObjectTrackingRealityView: View {
                         if let vis = objectVisualizations[id] {
                             appState.log("Setting updateHologram to be false!")
                             vis.updateHologram = false
+                            
+                            vis.setHologram(with: vis.hologramVisual.transform)
                         }
                         let message = SessionController.HologramUpdate(codedTransform: SessionController.CodableTransform(from: entity.transform), anchor_id: id, event: .started)
                         appState.log(message: message, id: id, optional: false)

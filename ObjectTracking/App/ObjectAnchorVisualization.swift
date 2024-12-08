@@ -20,6 +20,7 @@ class ObjectAnchorVisualization {
     
     var entity: Entity
     var hologram: Entity
+    var hologramVisual: Entity
     var updateHologram = true
     var objectId = UUID()
     
@@ -66,6 +67,7 @@ class ObjectAnchorVisualization {
         
         // Also instantiate the "hologram".
         let hologram = Entity()
+        let hologramVisual = Entity()
         if let model {
             let modelcopy = model.clone(recursive: true)
             // Overwrite the model's appearance to a yellow wireframe.
@@ -77,15 +79,20 @@ class ObjectAnchorVisualization {
             modelcopy.applyMaterialRecursively(wireframeMaterial)
             // Make the hologram slightly smaller so it fits "underneath" the model
             modelcopy.transform.scale *= 0.98
-            hologram.addChild(modelcopy)
+            hologramVisual.addChild(modelcopy)
         }
+        
         hologram.transform = transform
         hologram.isEnabled = hologram.isEnabled
+        hologramVisual.transform = transform
+        // hologram.addChild(hologramVisual)
         
         // Make the hologram grabbable
-        hologram.components.set(InputTargetComponent(allowedInputTypes: .indirect))
-        hologram.generateCollisionShapes(recursive: true)
+        hologramVisual.components.set(InputTargetComponent(allowedInputTypes: .indirect))
+        hologramVisual.generateCollisionShapes(recursive: true)
         self.hologram = hologram
+        
+        self.hologramVisual = hologramVisual
     }
     
     init(for transform: Transform, withModel model: Entity? = nil) {
@@ -123,6 +130,7 @@ class ObjectAnchorVisualization {
         
         // Also instantiate the "hologram".
         let hologram = Entity()
+        let hologramVisual = Entity()
         if let model {
             let modelcopy = model.clone(recursive: true)
             // Overwrite the model's appearance to a yellow wireframe.
@@ -134,15 +142,18 @@ class ObjectAnchorVisualization {
             modelcopy.applyMaterialRecursively(wireframeMaterial)
             // Make the hologram slightly smaller so it fits "underneath" the model
             modelcopy.transform.scale *= 1.10
-            hologram.addChild(modelcopy)
+            hologramVisual.addChild(modelcopy)
         }
         hologram.transform = transform
         hologram.isEnabled = hologram.isEnabled
+        // hologramVisual.transform = transform
+        hologram.addChild(hologramVisual)
         
         // Make the hologram grabbable
-        hologram.components.set(InputTargetComponent(allowedInputTypes: .indirect))
-        hologram.generateCollisionShapes(recursive: true)
+        hologramVisual.components.set(InputTargetComponent(allowedInputTypes: .indirect))
+        hologramVisual.generateCollisionShapes(recursive: true)
         self.hologram = hologram
+        self.hologramVisual = hologramVisual
     }
     
     func update(with anchor: ObjectAnchor) {
@@ -164,7 +175,18 @@ class ObjectAnchorVisualization {
         
         if updateHologram {
             hologram.transform = transform
+            hologramVisual.transform = transform
         }
+    }
+    
+    func setHologram(with transform: Transform) {
+        hologram.transform = transform
+        hologramVisual.transform = transform
+    }
+    
+    func setHologramSmooth(with transform: Transform, duration: TimeInterval = 1.0) {
+        hologram.transform = transform
+        hologramVisual.move(to: transform, relativeTo: nil, duration: duration)
     }
     
     func distanceToHologram() -> Float {

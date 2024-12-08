@@ -60,6 +60,7 @@ class SessionController {
         
         self.session = session
         self.messenger = GroupSessionMessenger(session: session)
+        systemCoordinator.configuration.spatialTemplatePreference = SpatialTemplatePreference.conversational
         self.systemCoordinator = systemCoordinator
 
 //        self.localPlayer = PlayerModel(
