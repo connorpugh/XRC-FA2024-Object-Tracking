@@ -89,8 +89,18 @@ struct ObjectTrackingRealityView: View {
         RealityView { content, attachments in
             // Clear the visualizations of past runs
             objectVisualizations.removeAll()
-            
-            
+            // Load audio
+            // Declare the audio variable outside the do-catch block
+            var audio: AudioFileResource?
+
+            do {
+                // Attempt to load the audio file
+                audio = try await AudioFileResource.load(named: "ding.mp3")
+            } catch {
+                print("Failed to load audio: \(error)")
+                // Provide fallback or handle error
+            }
+        
             
             content.add(root)
             
@@ -288,6 +298,7 @@ struct ObjectTrackingRealityView: View {
                     }
                     // If defineBoundaries is on
                     if appState.defineBoundaries {
+                        boundary.wireframeBox?.isEnabled = true
                         // For each object in the visualizations list
                         for (_, value) in objectVisualizations {
                             // Extend the boundary towards its location
@@ -295,6 +306,8 @@ struct ObjectTrackingRealityView: View {
                         }
                         // Update the visualization
                         boundary.updateWireframe()
+                    } else {
+                        boundary.wireframeBox?.isEnabled = false
                     }
                     
                     lastDefineBoundaries = appState.defineBoundaries
@@ -384,7 +397,9 @@ struct ObjectTrackingRealityView: View {
                             //print("Status is ", o.updateHologram)
                             if o.updateHologram == false && !currentlyGrabbing && o.distanceToHologram() < 0.03 {
                                 appState.log("Reconnecting!")
-                                //o.hologram.playAudio(audio)
+                                if let a = audio {
+                                    o.hologram.playAudio(a)
+                                }
                                 o.updateHologram = true
                                 debug = "Reconnected"
                                 
