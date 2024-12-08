@@ -20,6 +20,7 @@
 		36A3A9742CD0CDFD00F4E003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 36A3A9732CD0CCB100F4E003 /* Assets.xcassets */; };
 		36A3A9782CD1BE1200F4E003 /* juniormints.referenceobject in Sources */ = {isa = PBXBuildFile; fileRef = 36A3A9772CD1BE1200F4E003 /* juniormints.referenceobject */; };
 		36E2FD632D05224F0009642F /* ding.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 36E2FD622D05224E0009642F /* ding.mp3 */; };
+		36E2FD692D064DDA0009642F /* pop.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 36E2FD682D064DDA0009642F /* pop.mp3 */; };
 		393E4AB02A9629A7005C9691 /* Entity+ObjectTracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393E4AAF2A9629A7005C9691 /* Entity+ObjectTracking.swift */; };
 		394D18CF2A960EB9009E3A2E /* ObjectTrackingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 394D18CE2A960EB9009E3A2E /* ObjectTrackingApp.swift */; };
 		396786C62B766C54007A056F /* ObjectAnchorVisualization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 396786C52B766C44007A056F /* ObjectAnchorVisualization.swift */; };
@@ -46,6 +47,7 @@
 		36A3A9732CD0CCB100F4E003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		36A3A9772CD1BE1200F4E003 /* juniormints.referenceobject */ = {isa = PBXFileReference; lastKnownFileType = file.referenceobject; path = juniormints.referenceobject; sourceTree = "<group>"; };
 		36E2FD622D05224E0009642F /* ding.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = ding.mp3; sourceTree = "<group>"; };
+		36E2FD682D064DDA0009642F /* pop.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = pop.mp3; sourceTree = "<group>"; };
 		393E4AAD2A96284F005C9691 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		393E4AAF2A9629A7005C9691 /* Entity+ObjectTracking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Entity+ObjectTracking.swift"; sourceTree = "<group>"; };
 		394D18C72A960EB9009E3A2E /* ObjectTracking.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ObjectTracking.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -104,6 +106,7 @@
 			children = (
 				8B0AF4162C3EEDDA0076F08A /* README.md */,
 				36E2FD622D05224E0009642F /* ding.mp3 */,
+				36E2FD682D064DDA0009642F /* pop.mp3 */,
 				36A3A9732CD0CCB100F4E003 /* Assets.xcassets */,
 				8B0AF4152C3DC91B0076F08A /* LICENSE.txt */,
 				366534B12CD0C53E00DED3FD /* Hidden References */,
@@ -249,6 +252,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				36E2FD692D064DDA0009642F /* pop.mp3 in Resources */,
 				36E2FD632D05224F0009642F /* ding.mp3 in Resources */,
 				36A3A9742CD0CDFD00F4E003 /* Assets.xcassets in Resources */,
 			);

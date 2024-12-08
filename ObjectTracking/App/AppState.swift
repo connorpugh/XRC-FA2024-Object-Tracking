@@ -58,10 +58,10 @@ class AppState {
     
     func log(message: SessionController.HologramUpdate, id: UUID, optional: Bool = false) {
         if message.anchor_id.uuidString == id.uuidString {
-            log("Sending HologramUpdate \(message.event), id is \( id.uuidString.prefix(12))...", optional: optional)
+            log("Sending target update, id is \( id.uuidString.prefix(12))...", optional: optional)
         }
         else {
-            log("Sending HologramUpdate \(message.event), anchor id is \(message.anchor_id.uuidString.prefix(12))..., id is \( id.uuidString.prefix(12))...", optional: optional)
+            log("Sending target update, anchor id is \(message.anchor_id.uuidString.prefix(12))..., id is \( id.uuidString.prefix(12))...", optional: optional)
         }
     }
     func log(message: SessionController.TrackingUpdate, id: UUID, optional: Bool = false) {

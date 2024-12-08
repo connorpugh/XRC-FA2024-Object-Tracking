@@ -111,9 +111,10 @@ struct HomeView: View {
                         Button(action: {
                             appState.automaticTargetPlacement.toggle()
                                     }) {
-                                        Text(appState.automaticTargetPlacement ? "Auto Targets: ON" : "Auto Targets: OFF")
+                                        Text(appState.automaticTargetPlacement ? "Stop Spawning Targets" : "Start Spawning Targets")
                                     }
                                     .padding()
+                                    .disabled(!appState.isImmersiveSpaceOpened)
                         Text(appState.defineBoundaries ?
                              "Stop automatically placing targets." :
                                 "This will automatically place targets."

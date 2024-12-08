@@ -198,8 +198,7 @@ class ObjectAnchorVisualization {
             hologramMaterial.baseColor = .init(tint: twoPartLerpColor(t: 5 * distanceToHologram()))
             hologramVisual.applyMaterialRecursively(hologramMaterial)
             // Update hologram's rotation to match the model, regardless of whether it's attached
-            //hologram.transform.rotation = entity.transform.rotation
-            //hologramVisual.transform.rotation = entity.transform.rotation
+            // If the hologram visual is no longer moving, rotate the hologram to adjust & match the entity
         }
         
         if lastUpdateHologram != updateHologram {

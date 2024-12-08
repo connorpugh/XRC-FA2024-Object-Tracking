@@ -11,6 +11,7 @@ import RealityKit
 class BoundaryManager {
     private(set) var min_bounds: SIMD3<Float>
     private(set) var max_bounds: SIMD3<Float>
+    private(set) var notInitialized: Bool
     var wireframeBox: Entity? // Store a reference to the wireframe entity
     private var wireframeEdges: [ModelEntity] = []
     
@@ -18,7 +19,7 @@ class BoundaryManager {
     init(center: SIMD3<Float>) {
         self.min_bounds = center - SIMD3(0.1, 0.0, 0.1) // Expand half in x and z directions
         self.max_bounds = center + SIMD3(0.1, 0.0, 0.1)
-        
+        self.notInitialized = true
         
     }
     
@@ -34,12 +35,15 @@ class BoundaryManager {
             max(point.y, max_bounds.y),
             max(point.z, max_bounds.z)
         )
+        
+        // Update the
     }
     
     /// Resets the boundary to a (1, 0, 1) size around the given point.
-    @MainActor func reset(to center: SIMD3<Float>) {
+    @MainActor func reset(to center: SIMD3<Float>, reset: Bool = false) {
         min_bounds = center - SIMD3(0.1, 0.0, 0.1)
         max_bounds = center + SIMD3(0.1, 0.0, 0.1)
+        notInitialized = reset
     }
     
     /// Generates a random location within the boundary that is at least `minDistance` away from a given point.
