@@ -60,7 +60,6 @@ class SessionController {
         
         self.session = session
         self.messenger = GroupSessionMessenger(session: session)
-        systemCoordinator.configuration.spatialTemplatePreference = SpatialTemplatePreference.conversational
         self.systemCoordinator = systemCoordinator
 
 //        self.localPlayer = PlayerModel(
@@ -114,6 +113,7 @@ class SessionController {
     
     func configureSystemCoordinator() {
         systemCoordinator.configuration.supportsGroupImmersiveSpace = true
+        systemCoordinator.configuration.spatialTemplatePreference = SpatialTemplatePreference.conversational
         
 //        Task {
 //            for await localParticipantState in systemCoordinator.localParticipantStates {
