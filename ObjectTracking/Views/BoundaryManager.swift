@@ -73,10 +73,11 @@ class BoundaryManager {
         let boxMesh = MeshResource.generateBox(size: 1.0)
 
         // Create a semi-transparent material
-        let transparentMaterial = SimpleMaterial(
-            color: .init(white: 1.0, alpha: 0.2), // White with 20% opacity
-            isMetallic: false
-        )
+        var transparentMaterial = PhysicallyBasedMaterial()
+        transparentMaterial.triangleFillMode = .lines
+        transparentMaterial.faceCulling = .none
+        transparentMaterial.baseColor = .init(tint: .red)
+        transparentMaterial.blending = .transparent(opacity: 0.5)
 
         // Create a ModelEntity using the mesh and material
         let boxEntity = ModelEntity(mesh: boxMesh, materials: [transparentMaterial])

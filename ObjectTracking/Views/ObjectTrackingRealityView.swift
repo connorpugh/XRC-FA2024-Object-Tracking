@@ -221,7 +221,9 @@ struct ObjectTrackingRealityView: View {
                             //print("Status is ", o.updateHologram)
                             if o.updateHologram == false && !currentlyGrabbing && o.distanceToHologram() < 0.03 {
                                 print("Reconnecting!")
-                                //o.hologram.playAudio(audio)
+                                if let a = audio {
+                                    o.hologram.playAudio(a)
+                                }
                                 o.updateHologram = true
                                 debug = "Reconnected remotely"
                                 
@@ -266,7 +268,7 @@ struct ObjectTrackingRealityView: View {
                         case .started:
                             // A remote hologram target is added
                             debug = "Recieved remote hologram target"
-                            o.setHologram(with: message.codedTransform.toTransform())
+                            o.setHologramSmooth(with: message.codedTransform.toTransform())
                             o.updateHologram = false
                         case .ended:
                             // A remote hologram target is ended (currently unused)
@@ -317,6 +319,23 @@ struct ObjectTrackingRealityView: View {
                     // print("The current bounds are \(boundary.min_bounds) to \(boundary.max_bounds)")
                     
                     // Add a delay between repetitions
+                    try? await Task.sleep(nanoseconds: UInt64(0.2)*1_000_000_000) // 0.2 second interval
+                }
+            }
+            
+            var lastAutoTarget = false
+            // Update boundaries every 0.2 seconds if defineBoundaries is true
+            Task {
+                while !Task.isCancelled {
+                    // When auto targets is turned on, call the function
+                    if !lastAutoTarget && appState.automaticTargetPlacement {
+                        if let o = objectVisualizations.first {
+                            await pickNewTarget(target: o.value)
+                        }
+                    }
+                    if lastAutoTarget != appState.automaticTargetPlacement {
+                        lastAutoTarget = appState.automaticTargetPlacement
+                    }
                     try? await Task.sleep(nanoseconds: UInt64(0.2)*1_000_000_000) // 0.2 second interval
                 }
             }

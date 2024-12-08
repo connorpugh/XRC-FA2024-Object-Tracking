@@ -91,7 +91,7 @@ struct HomeView: View {
                         // Add a share button to the object tracking demo.
                         SharePlayButton().padding(.vertical, 20)
                         
-                       
+                    VStack {
                         Button(action: {
                                         appState.defineBoundaries.toggle()
                                     }) {
@@ -99,13 +99,29 @@ struct HomeView: View {
                                     }
                                     .padding()
                                     .disabled(!appState.isImmersiveSpaceOpened)
+                        Text(appState.defineBoundaries ?
+                             "Stop defining the area where targets can spawn." :
+                                "Define the boundary where targets can spawn."
+                        )
+                        .foregroundStyle(.secondary)
+                        .font(.footnote)
+                        .padding(.horizontal)
+                    }
+                    VStack {
                         Button(action: {
                             appState.automaticTargetPlacement.toggle()
                                     }) {
                                         Text(appState.automaticTargetPlacement ? "Auto Targets: ON" : "Auto Targets: OFF")
                                     }
                                     .padding()
-                    
+                        Text(appState.defineBoundaries ?
+                             "Stop automatically placing targets." :
+                                "This will automatically place targets."
+                        )
+                        .foregroundStyle(.secondary)
+                        .font(.footnote)
+                        .padding(.horizontal)
+                    }
                 }
             }
         }
@@ -202,36 +218,36 @@ struct HomeView: View {
             
         } detail: {
             VStack {
-                if !appState.referenceObjectLoader.didFinishLoading {
-                    VStack {
-                        Text("Loading reference objects…")
-                        ProgressView(value: appState.referenceObjectLoader.progress)
-                            .frame(maxWidth: 200)
-                    }
-                } else if appState.referenceObjectLoader.referenceObjects.isEmpty {
-                    Text("Tap the + button to add reference objects, or include some in the 'Reference Objects' group of the app's Xcode project.")
-                } else if selectedReferenceObjectID == nil {
-                    Text("selectedReferenceObjectID is nil")
-                } else {
-                    if let selectedObject = appState.referenceObjectLoader.referenceObjects.first(where: { $0.id == selectedReferenceObjectID }) {
-                        // Display the USDZ file that the reference object was displayed on in this detail view.
-                        if let path = selectedObject.usdzFile, !fileImporterIsOpen {
-                            Model3D(url: path) { model in
-                                model
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fit)
-                                    .scaleEffect(0.5)
-                            } placeholder: {
-                                ProgressView()
-                            }
-                        } else {
-                            Text("No preview available")
-                        }
-                    } else {
-                        Text("No object selected")
-                    }
-                }
-                Divider()
+//                if !appState.referenceObjectLoader.didFinishLoading {
+//                    VStack {
+//                        Text("Loading reference objects…")
+//                        ProgressView(value: appState.referenceObjectLoader.progress)
+//                            .frame(maxWidth: 200)
+//                    }
+//                } else if appState.referenceObjectLoader.referenceObjects.isEmpty {
+//                    Text("Tap the + button to add reference objects, or include some in the 'Reference Objects' group of the app's Xcode project.")
+//                } else if selectedReferenceObjectID == nil {
+//                    Text("selectedReferenceObjectID is nil")
+//                } else {
+//                    if let selectedObject = appState.referenceObjectLoader.referenceObjects.first(where: { $0.id == selectedReferenceObjectID }) {
+//                        // Display the USDZ file that the reference object was displayed on in this detail view.
+//                        if let path = selectedObject.usdzFile, !fileImporterIsOpen {
+//                            Model3D(url: path) { model in
+//                                model
+//                                    .resizable()
+//                                    .aspectRatio(contentMode: .fit)
+//                                    .scaleEffect(0.5)
+//                            } placeholder: {
+//                                ProgressView()
+//                            }
+//                        } else {
+//                            Text("No preview available")
+//                        }
+//                    } else {
+//                        Text("No object selected")
+//                    }
+//                }
+//                Divider()
                 Text("Log").bold().padding(.top)
                 ScrollView {
                     Text(appState.logText).textSelection(.enabled)

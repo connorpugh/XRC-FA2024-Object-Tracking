@@ -24,6 +24,10 @@ class ObjectAnchorVisualization {
     var updateHologram = true
     var objectId = UUID()
     
+    var baseMaterial: PhysicallyBasedMaterial
+    var hologramMaterial: PhysicallyBasedMaterial
+    var hiddenMaterial: PhysicallyBasedMaterial
+    
 
     init(for anchor: ObjectAnchor, withModel model: Entity? = nil) {
         //boundingBoxOutline = BoundingBoxOutline(anchor: anchor, alpha: alpha)
@@ -34,19 +38,28 @@ class ObjectAnchorVisualization {
         
         let originVisualization = Entity.createAxes(axisScale: axisScale, alpha: alpha)
         
+        // Define materials
+        baseMaterial = PhysicallyBasedMaterial()
+        baseMaterial.triangleFillMode = .lines
+        baseMaterial.faceCulling = .back
+        baseMaterial.baseColor = .init(tint: .white)
+        baseMaterial.blending = .transparent(opacity: 0.2)
+        
+        hologramMaterial = PhysicallyBasedMaterial()
+        hologramMaterial.triangleFillMode = .lines
+        hologramMaterial.faceCulling = .back
+        hologramMaterial.baseColor = .init(tint: .red)
+        hologramMaterial.blending = .transparent(opacity: 0.6)
+        
+        hiddenMaterial = PhysicallyBasedMaterial()
+        hiddenMaterial.triangleFillMode = .lines
+        hiddenMaterial.faceCulling = .back
+        hiddenMaterial.baseColor = .init(tint: .red)
+        hiddenMaterial.blending = .transparent(opacity: 0.0)
+        
         if let model {
-            // Overwrite the model's appearance to a yellow wireframe.
-//            var wireframeMaterial = PhysicallyBasedMaterial()
-//            wireframeMaterial.triangleFillMode = .lines
-//            wireframeMaterial.faceCulling = .back
-//            wireframeMaterial.baseColor = .init(tint: .yellow)
-//            wireframeMaterial.blending = .transparent(opacity: 0.5)
-//            
-//            model.applyMaterialRecursively(wireframeMaterial)
+            model.applyMaterialRecursively(baseMaterial)
             entity.addChild(model)
-            
-            
-            
         }
         
         //boundingBoxOutline.entity.isEnabled = model == nil
@@ -71,14 +84,8 @@ class ObjectAnchorVisualization {
         if let model {
             let modelcopy = model.clone(recursive: true)
             // Overwrite the model's appearance to a yellow wireframe.
-            var wireframeMaterial = PhysicallyBasedMaterial()
-            wireframeMaterial.triangleFillMode = .lines
-            wireframeMaterial.faceCulling = .back
-            wireframeMaterial.baseColor = .init(tint: .yellow)
-            wireframeMaterial.blending = .transparent(opacity: 0.2)
-            modelcopy.applyMaterialRecursively(wireframeMaterial)
+            modelcopy.applyMaterialRecursively(hiddenMaterial)
             // Make the hologram slightly smaller so it fits "underneath" the model
-            modelcopy.transform.scale *= 0.98
             hologramVisual.addChild(modelcopy)
         }
         
@@ -102,17 +109,29 @@ class ObjectAnchorVisualization {
         
         let originVisualization = Entity.createAxes(axisScale: axisScale, alpha: alpha)
         
+        baseMaterial = PhysicallyBasedMaterial()
+        baseMaterial.triangleFillMode = .lines
+        baseMaterial.faceCulling = .back
+        baseMaterial.baseColor = .init(tint: .white)
+        baseMaterial.blending = .transparent(opacity: 0.2)
+        
+        hologramMaterial = PhysicallyBasedMaterial()
+        hologramMaterial.triangleFillMode = .lines
+        hologramMaterial.faceCulling = .back
+        hologramMaterial.baseColor = .init(tint: .red)
+        hologramMaterial.blending = .transparent(opacity: 0.6)
+        
+        hiddenMaterial = PhysicallyBasedMaterial()
+        hiddenMaterial.triangleFillMode = .lines
+        hiddenMaterial.faceCulling = .back
+        hiddenMaterial.baseColor = .init(tint: .red)
+        hiddenMaterial.blending = .transparent(opacity: 0.0)
+        
         if let model {
-            // Overwrite the model's appearance to a yellow wireframe.
-//            var wireframeMaterial = PhysicallyBasedMaterial()
-//            wireframeMaterial.triangleFillMode = .lines
-//            wireframeMaterial.faceCulling = .back
-//            wireframeMaterial.baseColor = .init(tint: .yellow)
-//            wireframeMaterial.blending = .transparent(opacity: 0.5)
-//
-//            model.applyMaterialRecursively(wireframeMaterial)
+            model.applyMaterialRecursively(baseMaterial)
             entity.addChild(model)
         }
+        
         
         //boundingBoxOutline.entity.isEnabled = model == nil
         
@@ -134,14 +153,8 @@ class ObjectAnchorVisualization {
         if let model {
             let modelcopy = model.clone(recursive: true)
             // Overwrite the model's appearance to a yellow wireframe.
-            var wireframeMaterial = PhysicallyBasedMaterial()
-            wireframeMaterial.triangleFillMode = .lines
-            wireframeMaterial.faceCulling = .back
-            wireframeMaterial.baseColor = .init(tint: .yellow)
-            wireframeMaterial.blending = .transparent(opacity: 0.2)
-            modelcopy.applyMaterialRecursively(wireframeMaterial)
+            modelcopy.applyMaterialRecursively(hiddenMaterial)
             // Make the hologram slightly smaller so it fits "underneath" the model
-            modelcopy.transform.scale *= 1.10
             hologramVisual.addChild(modelcopy)
         }
         hologram.transform = transform
@@ -170,13 +183,29 @@ class ObjectAnchorVisualization {
         }
     }
     
+    var lastUpdateHologram = true
     func update(with transform: Transform) {
         entity.transform = transform
         
         if updateHologram {
             hologram.transform = transform
             hologramVisual.transform = transform
+        } else {
+            hologramMaterial.baseColor = .init(tint: twoPartLerpColor(t: 5 * distanceToHologram()))
+            hologramVisual.applyMaterialRecursively(hologramMaterial)
+            // Update hologram's rotation to match the model, regardless of whether it's attached
+            //hologram.transform.rotation = entity.transform.rotation
+            //hologramVisual.transform.rotation = entity.transform.rotation
         }
+        
+        if lastUpdateHologram != updateHologram {
+            hologramMaterial.baseColor = .init(tint: .red)
+            hologramVisual.applyMaterialRecursively(updateHologram ? hiddenMaterial : hologramMaterial)
+            
+            lastUpdateHologram = updateHologram
+        }
+        
+        
     }
     
     func setHologram(with transform: Transform) {
@@ -197,6 +226,33 @@ class ObjectAnchorVisualization {
         let dz = pos2.z - pos1.z
         return sqrt(dx * dx + dy * dy + dz * dz) // Using Float precision
     }
+    
+    func twoPartLerpColor(t: Float) -> UIColor {
+        // Ensure t is clamped between 0 and 1
+        let clampedT = max(0, min(1, t))
+        
+        if clampedT <= 0.5 {
+            // First part: Green to Yellow
+            let localT = clampedT / 0.5 // Map 0 to 0.5 into 0 to 1
+            return lerpColor(from: (r: 0.0, g: 1.0, b: 0.0), // Green
+                             to: (r: 0.7, g: 0.7, b: 0.0), // Yellow
+                             t: localT)
+        } else {
+            // Second part: Yellow to Red
+            let localT = (clampedT - 0.5) / 0.5 // Map 0.5 to 1 into 0 to 1
+            return lerpColor(from: (r: 0.7, g: 0.7, b: 0.0), // Yellow
+                             to: (r: 1.0, g: 0.0, b: 0.0), // Red
+                             t: localT)
+        }
+    }
+
+    func lerpColor(from color1: (r: Float, g: Float, b: Float), to color2: (r: Float, g: Float, b: Float), t: Float) -> UIColor {
+        let r = Double(color1.r + (color2.r - color1.r) * t)
+        let g = Double(color1.g + (color2.g - color1.g) * t)
+        let b = Double(color1.b + (color2.b - color1.b) * t)
+        return UIColor(red: r, green: g, blue: b, alpha: 1.0)
+    }
+    
     
     @MainActor
     class BoundingBoxOutline {
